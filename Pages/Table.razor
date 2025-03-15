@@ -1,0 +1,64 @@
+﻿@page "/table"
+@using BlazorApp3.Models
+@using BlazorApp3.Shared
+@inject IJSRuntime JS
+
+<h3>📊 Список пользователей</h3>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Email</th>
+            <th>Возраст</th>
+            <th>Действие</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in users)
+        {
+            <tr>
+                <td>@user.Name</td>
+                <td>@user.Email</td>
+                <td>@user.Age</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => ShowUserDetails(user)">
+                        Подробнее
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<Modal @ref="modal" Title="Информация о пользователе">
+    @if (selectedUser != null)
+    {
+        <div class="user-details">
+            <p><strong>Имя:</strong> @selectedUser.Name</p>
+            <p><strong>Email:</strong> @selectedUser.Email</p>
+            <p><strong>Возраст:</strong> @selectedUser.Age лет</p>
+        </div>
+    }
+</Modal>
+
+@code {
+    private List<User> users = new()
+    {
+        new User { Name = "Иван", Email = "ivan@example.com", Age = 25 },
+        new User { Name = "Анна", Email = "anna@example.com", Age = 30 },
+        new User { Name = "Олег", Email = "oleg@example.com", Age = 22 }
+    };
+
+    private Modal? modal;
+    private User? selectedUser;
+
+    private async Task ShowUserDetails(User user)
+    {
+        selectedUser = user;
+        if (modal != null)
+        {
+            await modal.ShowAsync();
+        }
+    }
+}

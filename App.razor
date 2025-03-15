@@ -1,0 +1,12 @@
+﻿<ErrorBoundary>
+    <CascadingValue Value="this">
+        <Router AppAssembly="@typeof(Program).Assembly">
+            <Found Context="routeData">
+                <RouteView RouteData="@routeData" DefaultLayout="typeof(MainLayout)" />
+            </Found>
+            <NotFound>
+                <h3>❌ Страница не найдена!</h3>
+            </NotFound>
+        </Router>
+    </CascadingValue>
+</ErrorBoundary>

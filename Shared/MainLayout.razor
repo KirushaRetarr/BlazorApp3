@@ -1,0 +1,14 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>BlazorApp3</PageTitle>
+
+<div class="with-sidebar">
+    <NavMenu />
+    <div class="main-content">
+        @Body
+    </div>
+</div>
+
+<ErrorBoundary>
+    <UserForm />
+</ErrorBoundary>

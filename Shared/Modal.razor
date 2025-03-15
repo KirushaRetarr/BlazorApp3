@@ -1,0 +1,65 @@
+﻿@inject IJSRuntime JSRuntime
+
+<div class="modal fade" id="@Id" tabindex="-1" role="dialog" aria-labelledby="@($"{Id}Label")" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="@($"{Id}Label")">@Title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @ChildContent
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                @if (ShowSaveButton)
+                {
+                    <button type="button" class="btn btn-primary" @onclick="OnSave">Сохранить</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Id { get; set; } = "modal_" + Guid.NewGuid().ToString("N");
+
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public bool ShowSaveButton { get; set; } = false;
+
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    private IJSObjectReference? module;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/modal.js");
+        }
+    }
+
+    public async Task ShowAsync()
+    {
+        if (module != null)
+        {
+            await module.InvokeVoidAsync("showModal", Id);
+        }
+    }
+
+    public async Task HideAsync()
+    {
+        if (module != null)
+        {
+            await module.InvokeVoidAsync("hideModal", Id);
+        }
+    }
+}

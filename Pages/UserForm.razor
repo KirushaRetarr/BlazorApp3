@@ -1,0 +1,46 @@
+﻿@page "/userform"
+@using BlazorApp3.Models
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedSessionStorage ProtectedStorage
+
+<h3>📄 Форма пользователя</h3>
+
+<EditForm Model="user" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Имя:</label>
+        <InputText class="form-control" @bind-Value="user.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Возраст:</label>
+        <InputNumber class="form-control" @bind-Value="user.Age" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email:</label>
+        <InputText class="form-control" @bind-Value="user.Email" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+</EditForm>
+
+@code {
+    private User user = new();
+
+    private async Task HandleValidSubmit()
+    {
+        await ProtectedStorage.SetAsync("userData", user);
+        Console.WriteLine("✅ Данные сохранены в sessionStorage");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await ProtectedStorage.GetAsync<User>("userData");
+        if (result.Success)
+            user = result.Value;
+    }
+}
