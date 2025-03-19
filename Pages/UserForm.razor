@@ -4,43 +4,94 @@
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProtectedSessionStorage ProtectedStorage
 
-<h3>📄 Форма пользователя</h3>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">🐾 Add Your Pet</h3>
 
-<EditForm Model="user" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+                    <EditForm Model="pet" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
 
-    <div class="mb-3">
-        <label class="form-label">Имя:</label>
-        <InputText class="form-control" @bind-Value="user.Name" />
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Pet Name:</label>
+                                <InputText class="form-control" @bind-Value="pet.Name" placeholder="Enter pet's name" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Species:</label>
+                                <InputSelect class="form-select" @bind-Value="pet.Species">
+                                    <option value="">Select species</option>
+                                    <option value="Dog">Dog</option>
+                                    <option value="Cat">Cat</option>
+                                    <option value="Bird">Bird</option>
+                                    <option value="Fish">Fish</option>
+                                    <option value="Other">Other</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Breed:</label>
+                                <InputText class="form-control" @bind-Value="pet.Breed" placeholder="Enter breed" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Age (years):</label>
+                                <InputNumber class="form-control" @bind-Value="pet.Age" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Weight (kg):</label>
+                            <InputNumber class="form-control" @bind-Value="pet.Weight" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Medical History:</label>
+                            <InputTextArea class="form-control" @bind-Value="pet.MedicalHistory" rows="3" 
+                                placeholder="Enter any medical conditions or allergies" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Last Vaccination Date:</label>
+                            <InputDate class="form-control" @bind-Value="pet.LastVaccinationDate" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Next Check-up Date:</label>
+                            <InputDate class="form-control" @bind-Value="pet.NextCheckupDate" />
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-save me-2"></i>Save Pet Information
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Возраст:</label>
-        <InputNumber class="form-control" @bind-Value="user.Age" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Email:</label>
-        <InputText class="form-control" @bind-Value="user.Email" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Сохранить</button>
-</EditForm>
+</div>
 
 @code {
-    private User user = new();
+    private Pet pet = new();
 
     private async Task HandleValidSubmit()
     {
-        await ProtectedStorage.SetAsync("userData", user);
-        Console.WriteLine("✅ Данные сохранены в sessionStorage");
+        await ProtectedStorage.SetAsync("petData", pet);
+        Console.WriteLine("✅ Pet information saved successfully");
     }
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await ProtectedStorage.GetAsync<User>("userData");
+        var result = await ProtectedStorage.GetAsync<Pet>("petData");
         if (result.Success)
-            user = result.Value;
+            pet = result.Value;
     }
 }

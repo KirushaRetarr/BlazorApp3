@@ -3,62 +3,129 @@
 @using BlazorApp3.Shared
 @inject IJSRuntime JS
 
-<h3>📊 Список пользователей</h3>
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>🐾 Pet Records</h3>
+        <div class="input-group" style="max-width: 300px;">
+            <span class="input-group-text bg-white">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" class="form-control" placeholder="Search pets..." @bind="searchTerm" @bind:event="oninput" />
+        </div>
+    </div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Имя</th>
-            <th>Email</th>
-            <th>Возраст</th>
-            <th>Действие</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var user in users)
-        {
-            <tr>
-                <td>@user.Name</td>
-                <td>@user.Email</td>
-                <td>@user.Age</td>
-                <td>
-                    <button class="btn btn-primary" @onclick="() => ShowUserDetails(user)">
-                        Подробнее
-                    </button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Species</th>
+                            <th>Breed</th>
+                            <th>Age</th>
+                            <th>Next Check-up</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pet in filteredPets)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi @GetPetIcon(pet.Species) me-2 text-primary"></i>
+                                        @pet.Name
+                                    </div>
+                                </td>
+                                <td>@pet.Species</td>
+                                <td>@pet.Breed</td>
+                                <td>@pet.Age years</td>
+                                <td>@pet.NextCheckupDate?.ToShortDateString()</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowPetDetails(pet)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success" @onclick="() => EditPet(pet)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
-<Modal @ref="modal" Title="Информация о пользователе">
-    @if (selectedUser != null)
+<Modal @ref="modal" Title="Pet Details">
+    @if (selectedPet != null)
     {
-        <div class="user-details">
-            <p><strong>Имя:</strong> @selectedUser.Name</p>
-            <p><strong>Email:</strong> @selectedUser.Email</p>
-            <p><strong>Возраст:</strong> @selectedUser.Age лет</p>
+        <div class="pet-details">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Basic Information</h5>
+                    <p><strong>Name:</strong> @selectedPet.Name</p>
+                    <p><strong>Species:</strong> @selectedPet.Species</p>
+                    <p><strong>Breed:</strong> @selectedPet.Breed</p>
+                    <p><strong>Age:</strong> @selectedPet.Age years</p>
+                    <p><strong>Weight:</strong> @selectedPet.Weight kg</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Health Information</h5>
+                    <p><strong>Last Vaccination:</strong> @selectedPet.LastVaccinationDate?.ToShortDateString()</p>
+                    <p><strong>Next Check-up:</strong> @selectedPet.NextCheckupDate?.ToShortDateString()</p>
+                    <p><strong>Medical History:</strong> @selectedPet.MedicalHistory</p>
+                </div>
+            </div>
         </div>
     }
 </Modal>
 
 @code {
-    private List<User> users = new()
+    private List<Pet> pets = new()
     {
-        new User { Name = "Иван", Email = "ivan@example.com", Age = 25 },
-        new User { Name = "Анна", Email = "anna@example.com", Age = 30 },
-        new User { Name = "Олег", Email = "oleg@example.com", Age = 22 }
+        new Pet { Name = "Max", Species = "Dog", Breed = "Golden Retriever", Age = 3, Weight = 30, LastVaccinationDate = DateTime.Now.AddMonths(-2), NextCheckupDate = DateTime.Now.AddMonths(10), MedicalHistory = "Regular check-ups, no issues" },
+        new Pet { Name = "Luna", Species = "Cat", Breed = "Siamese", Age = 2, Weight = 4, LastVaccinationDate = DateTime.Now.AddMonths(-1), NextCheckupDate = DateTime.Now.AddMonths(11), MedicalHistory = "Allergic to certain foods" },
+        new Pet { Name = "Charlie", Species = "Bird", Breed = "Parrot", Age = 1, Weight = 0.5, LastVaccinationDate = DateTime.Now.AddMonths(-3), NextCheckupDate = DateTime.Now.AddMonths(9), MedicalHistory = "Regular wing trimming" },
+        new Pet { Name = "Bella", Species = "Dog", Breed = "German Shepherd", Age = 4, Weight = 35, LastVaccinationDate = DateTime.Now.AddMonths(-4), NextCheckupDate = DateTime.Now.AddMonths(8), MedicalHistory = "Hip dysplasia monitoring" }
     };
 
     private Modal? modal;
-    private User? selectedUser;
+    private Pet? selectedPet;
+    private string searchTerm = "";
 
-    private async Task ShowUserDetails(User user)
+    private IEnumerable<Pet> filteredPets =>
+        pets.Where(p => string.IsNullOrEmpty(searchTerm) ||
+            p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            p.Species.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            p.Breed.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+    private string GetPetIcon(string species) =>
+        species.ToLower() switch
+        {
+            "dog" => "bi-heart-fill",
+            "cat" => "bi-heart-pulse-fill",
+            "bird" => "bi-cloud-fill",
+            "fish" => "bi-water",
+            _ => "bi-heart"
+        };
+
+    private async Task ShowPetDetails(Pet pet)
     {
-        selectedUser = user;
+        selectedPet = pet;
         if (modal != null)
         {
             await modal.ShowAsync();
         }
+    }
+
+    private void EditPet(Pet pet)
+    {
+        // Implement edit functionality
+        Console.WriteLine($"Editing pet: {pet.Name}");
     }
 }

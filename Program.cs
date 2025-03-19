@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
-builder.Services.AddScoped<ProtectedSessionStorage>(); // Подключаем ProtectedSessionStorage
+builder.Services.AddScoped<ProtectedSessionStorage>();
 
 var app = builder.Build();
 
@@ -22,17 +22,18 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
-
 app.UseRouting();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
+// Configure error handling
+app.UseStatusCodePagesWithReExecute("/{0}");
+
 if (!app.Environment.IsProduction())
 {
-    app.UseDeveloperExceptionPage(); // Показывает точные ошибки Blazor
+    app.UseDeveloperExceptionPage();
 }
 
 app.Run();
